@@ -21,8 +21,8 @@ export class Company extends CommonEntity {
   @Column({ type: "varchar", length: 150, unique: true })
   address: string;
 
-  @OneToOne(() => User)
-  @JoinColumn({ name: "creator_id" })
+  @OneToOne(() => User, (user) => user.created_company, { onDelete: "SET NULL" })
+  @JoinColumn()
   creator: User;
 
   @OneToMany(() => User, (user) => user.company, { cascade: true })

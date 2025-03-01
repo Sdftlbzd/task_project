@@ -45,7 +45,7 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const selectedHour = new Date();
     selectedHour.setHours(parseInt(hourStr, 10), parseInt(minuteStr, 10), 0, 0);
     const now = new Date();
-    const minHour = addMinutes(now, 1);
+    const minHour = addMinutes(now, 30);
 
     if (isBefore(selectedDeadline, startOfDay(now))) {
       res.status(400).json({ message: "Deadline cannot be in the past!" });
@@ -156,44 +156,7 @@ const update = async (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 };
 
-const list = async (req: AuthRequest, res: Response) => {
-  try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 5;
-    const status = req.query.status as string | undefined;
-
-    const before_page = (page - 1) * limit;
-
-    const whereCondition: any = {};
-    if (status) {
-      whereCondition.status = status;
-    }
-
-    const [list, total] = await Task.findAndCount({
-      where: whereCondition,
-      skip: before_page,
-      take: limit,
-    });
-
-    res.status(200).json({
-      data: list,
-      pagination: {
-        total,
-        page,
-        items_on_page: list.length,
-        per_page: Math.ceil(Number(total) / limit),
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Something went wrong",
-      error: error instanceof Error ? error.message : error,
-    });
-  }
-};
-
 export const TaskController = () => ({
   create,
   update,
-  list,
 });

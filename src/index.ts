@@ -15,7 +15,7 @@ AppDataSource.initialize()
     app.use(express.json());
     app.use("/api/v1", v1Routes);
 
-    app.get("/api/v1/cron", markExpiredTasksAsFailed);
+    //app.get("/api/v1/cron", markExpiredTasksAsFailed);
 
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);

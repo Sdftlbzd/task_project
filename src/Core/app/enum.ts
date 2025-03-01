@@ -16,7 +16,7 @@ export enum EPriorityType {
 }
 
 export enum ETaskStatusType {
-  NEW = "LOW",
+  NEW = "NEW",
   ON_HOLD = "ON HOLD",
   IN_PROGRESS = "IN PROGRESS",
   IMMADIATE = "IMMADIATE",
