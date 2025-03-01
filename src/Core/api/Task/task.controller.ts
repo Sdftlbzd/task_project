@@ -45,7 +45,7 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const selectedHour = new Date();
     selectedHour.setHours(parseInt(hourStr, 10), parseInt(minuteStr, 10), 0, 0);
     const now = new Date();
-    const minHour = addMinutes(now, 30);
+    const minHour = addMinutes(now, 1);
 
     if (isBefore(selectedDeadline, startOfDay(now))) {
       res.status(400).json({ message: "Deadline cannot be in the past!" });
@@ -160,91 +160,20 @@ const list = async (req: AuthRequest, res: Response) => {
   try {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
-    const status = req.query.status;
+    const status = req.query.status as string | undefined;
 
     const before_page = (page - 1) * limit;
-    let list: any;
-    let total: any;
 
-    if (!status) {
-      const [list, total] = await Task.findAndCount({
-        skip: before_page,
-        take: limit,
-      });
-      return;
-    } else if (status === ETaskStatusType.DEVELOPED) {
-      const [list, total] = await Task.findAndCount({
-        where: {
-          status,
-        },
-        skip: before_page,
-        take: limit,
-      });
-      return;
-    } else if (status === ETaskStatusType.IMMADIATE) {
-      const [list, total] = await Task.findAndCount({
-        where: {
-          status,
-        },
-        skip: before_page,
-        take: limit,
-      });
-      return;
-    } else if (status === ETaskStatusType.IN_PROGRESS) {
-      const [list, total] = await Task.findAndCount({
-        where: {
-          status,
-        },
-        skip: before_page,
-        take: limit,
-      });
-      return;
-    } else if (status === ETaskStatusType.IN_TESTING) {
-      const [list, total] = await Task.findAndCount({
-        where: {
-          status,
-        },
-        skip: before_page,
-        take: limit,
-      });
-      return;
-    } else if (status === ETaskStatusType.NEW) {
-      const [list, total] = await Task.findAndCount({
-        where: {
-          status,
-        },
-        skip: before_page,
-        take: limit,
-      });
-      return;
-    } else if (status === ETaskStatusType.ON_HOLD) {
-      const [list, total] = await Task.findAndCount({
-        where: {
-          status,
-        },
-        skip: before_page,
-        take: limit,
-      });
-      return;
-    } else if (status === ETaskStatusType.TESTED) {
-      const [list, total] = await Task.findAndCount({
-        where: {
-          status,
-        },
-        skip: before_page,
-        take: limit,
-      });
-      return;
-    } else if (status === ETaskStatusType.TEST_FAILED) {
-      const [list, total] = await Task.findAndCount({
-        where: {
-          status,
-        },
-        skip: before_page,
-        take: limit,
-      });
-      return;
+    const whereCondition: any = {};
+    if (status) {
+      whereCondition.status = status;
     }
+
+    const [list, total] = await Task.findAndCount({
+      where: whereCondition,
+      skip: before_page,
+      take: limit,
+    });
 
     res.status(200).json({
       data: list,
