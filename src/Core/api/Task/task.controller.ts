@@ -83,7 +83,7 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
       priority,
       status,
       users: employee_list,
-      creator:user
+      creator: user,
     });
 
     await newTask.save();
@@ -157,7 +157,7 @@ const update = async (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 };
 
-const getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
+const getByIdTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const user = req.user;
 
@@ -174,28 +174,39 @@ const getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
     }
 
     const task = await Task.findOne({
-      where: { id: task_id , creator:user},
+      where: { id: task_id },
       relations: ["users"],
       select: {
         id: true,
-        title:true,
-        description:true,
-        deadline:true,
-        hour:true,
-        priority:true,
-        status:true,
+        title: true,
+        description: true,
+        deadline: true,
+        hour: true,
+        priority: true,
+        status: true,
         created_at: true,
         users: {
           id: true,
           name: true,
           surname: true,
-          email:true
+          email: true,
         },
       },
     });
 
     if (!task) {
       res.status(404).json("Task is not found");
+      return;
+    }
+
+    const isUserAssigned = task.users.some(
+      (assignedUser) => assignedUser.id === user.id
+    );
+
+    if (!isUserAssigned) {
+      res
+        .status(403)
+        .json({ message: "You are not authorized to view this task" });
       return;
     }
 
@@ -208,5 +219,5 @@ const getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
 export const TaskController = () => ({
   create,
   update,
-  getById
+  getByIdTask,
 });

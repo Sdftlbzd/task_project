@@ -8,4 +8,4 @@ const controller = TaskController();
 
 taskRoutes.post("/create", roleCheck([ERoleType.ADMIN]), controller.create);
 taskRoutes.put("/update/:id", controller.update);
-taskRoutes.get("/get/by/:id", controller.getById);
+taskRoutes.get("/get/by/:id", controller.getByIdTask);
