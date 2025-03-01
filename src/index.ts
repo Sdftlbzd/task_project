@@ -1,11 +1,9 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import "reflect-metadata";
 import { AppDataSource } from "./DAL/config/data-source";
 import { appConfig } from "./consts";
 import { v1Routes } from "./Routes";
-import { Task } from "./DAL/models/Task.model";
-import cron from "node-cron";
-import markExpiredTasksAsFailed from "./Core/middlewares/cron.middleware";
+import markExpiredTasksAsFailed from "./Core/Cron/task.failed";
 
 AppDataSource.initialize()
   .then(() => {
