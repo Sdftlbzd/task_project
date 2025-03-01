@@ -157,7 +157,7 @@ const update = async (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 };
 
-const getByIdTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
+const getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const user = req.user;
 
@@ -219,5 +219,5 @@ const getByIdTask = async (req: AuthRequest, res: Response, next: NextFunction) 
 export const TaskController = () => ({
   create,
   update,
-  getByIdTask,
+  getById,
 });
