@@ -7,3 +7,4 @@ const controller = AdminController();
 adminRoutes.post("/add/employee", controller.addEmployee);
 adminRoutes.put("/task/update/:id", controller.updateTask);
 adminRoutes.get("/list", controller.taskList)
+adminRoutes.get("/get/by/:id", controller.getById);

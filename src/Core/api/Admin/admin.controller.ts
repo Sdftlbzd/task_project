@@ -306,8 +306,57 @@ const taskList = async (req: AuthRequest, res: Response) => {
   }
 };
 
+const getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      res.status(401).json({ message: "User not found!" });
+      return;
+    }
+
+    const task_id = Number(req.params.id);
+
+    if (!task_id) {
+      res.status(400).json("Id is required");
+      return;
+    }
+
+    const task = await Task.findOne({
+      where: { id: task_id , creator:user},
+      relations: ["users"],
+      select: {
+        id: true,
+        title:true,
+        description:true,
+        deadline:true,
+        hour:true,
+        priority:true,
+        status:true,
+        created_at: true,
+        users: {
+          id: true,
+          name: true,
+          surname: true,
+          email:true
+        },
+      },
+    });
+
+    if (!task) {
+      res.status(404).json("Task is not found");
+      return;
+    }
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error", error });
+  }
+};
+
 export const AdminController = () => ({
   addEmployee,
   updateTask,
   taskList,
+  getById
 });
