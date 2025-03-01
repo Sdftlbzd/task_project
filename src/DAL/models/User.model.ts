@@ -53,6 +53,9 @@ export class User extends CommonEntity {
   @ManyToMany(() => Task, (task) => task.users)
   tasks: Task[];
 
+  @OneToMany(() => Task, (task) => task.creator)
+  created_tasks: Task[];
+
   @OneToOne(() => Company, (company) => company.creator,  { cascade: true })
   @JoinColumn()  
   created_company: Company;

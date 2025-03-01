@@ -4,6 +4,8 @@ import {
   CreateDateColumn,
   ManyToMany,
   JoinTable,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import { CommonEntity } from "./Common.model";
 import { User } from "./User.model";
@@ -35,6 +37,10 @@ export class Task extends CommonEntity {
     default: ETaskStatusType.NEW,
   })
   status: ETaskStatusType;
+
+  @ManyToOne(() => User, (user) => user.created_tasks, { onDelete: "CASCADE" }) 
+  @JoinColumn({ name: "creatorId" }) 
+  creator: User;
 
   @ManyToMany(() => User, (user) => user.tasks)
   @JoinTable()
