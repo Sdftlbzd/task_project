@@ -306,7 +306,7 @@ const taskList = async (req: AuthRequest, res: Response) => {
   }
 };
 
-const getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
+const getByIdTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const user = req.user;
 
@@ -358,5 +358,5 @@ export const AdminController = () => ({
   addEmployee,
   updateTask,
   taskList,
-  getById
+  getByIdTask
 });
