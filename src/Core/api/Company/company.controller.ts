@@ -1,16 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { validate } from "class-validator";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { User } from "../../../DAL/models/User.model";
-import { ERoleType } from "../../app/enum";
 import { formatErrors } from "../../middlewares/error.moddleware";
-import { appConfig } from "../../../consts";
 import { Company } from "../../../DAL/models/Company.model";
 import { CreateCompanyDTO } from "./company.dto";
 import { AuthRequest } from "../../../types";
 
-const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
+const create = async (req: AuthRequest, res: Response) => {
   try {
     const user = req.user;
 
@@ -48,14 +43,17 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
 
     await newCompany.save();
 
+    user.created_company = newCompany;
+    await user.save();
+
     const Data = await Company.findOne({
       where: { phone },
       relations: ["creator"],
       select: ["id", "name", "creator", "created_at"],
+      loadRelationIds: true,
     });
 
     res.status(201).json(Data);
-    next();
   } catch (error) {
     res.status(500).json({
       message: "Something went wrong",
@@ -65,5 +63,5 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
 };
 
 export const CompanyController = () => ({
-   create
+  create,
 });
