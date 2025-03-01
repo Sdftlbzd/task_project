@@ -216,8 +216,76 @@ const getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 };
 
+const myTaskList = async (req: AuthRequest, res: Response) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      res.status(401).json({ message: "User not found!" });
+      return;
+    }
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const status = req.query.status as string | undefined;
+    const priority = req.query.priority as string | undefined;
+    const title = req.query.title as string | undefined;
+    const startDate = req.query.startDate as string | undefined;
+    const endDate = req.query.endDate as string | undefined;
+    const createdStartDate = req.query.createdStartDate as string | undefined;
+    const createdEndDate = req.query.createdEndDate as string | undefined;
+    const before_page = (page - 1) * limit;
+
+    const query = Task.createQueryBuilder("task")
+      .leftJoinAndSelect("task.users", "user")
+      .where("user.id = :userId", { userId: user.id })
+      .skip(before_page)
+      .take(limit);
+
+    if (status) query.andWhere("task.status = :status", { status });
+    if (priority) query.andWhere("task.priority = :priority", { priority });
+    if (title)
+      query.andWhere("task.title LIKE :title", { title: `%${title}%` });
+
+    if (startDate && endDate) {
+      query.andWhere("task.deadline BETWEEN :startDate AND :endDate", {
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+      });
+    }
+
+    if (createdStartDate && createdEndDate) {
+      query.andWhere(
+        "task.created_at BETWEEN :createdStartDate AND :createdEndDate",
+        {
+          createdStartDate: new Date(createdStartDate),
+          createdEndDate: new Date(createdEndDate),
+        }
+      );
+    }
+
+    const [list, total] = await query.getManyAndCount();
+
+    res.status(200).json({
+      data: list,
+      pagination: {
+        total,
+        page,
+        items_on_page: list.length,
+        per_page: Math.ceil(Number(total) / limit),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
 export const TaskController = () => ({
   create,
   update,
   getById,
+  myTaskList
 });
