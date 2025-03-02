@@ -50,7 +50,12 @@ export class User extends CommonEntity {
   })
   company: Company;
 
-  @ManyToMany(() => Task, (task) => task.users)
+  @ManyToMany(() => Task, (task) => task.users, { onDelete: "CASCADE" })
+  @JoinTable({
+    name: "employees_tasks",
+    joinColumn: { name: "employee_id" },
+    inverseJoinColumn: { name: "task_id" },
+  })
   tasks: Task[];
 
   @OneToMany(() => Task, (task) => task.creator)

@@ -42,7 +42,7 @@ export class Task extends CommonEntity {
   @JoinColumn({ name: "creatorId" }) 
   creator: User;
 
-  @ManyToMany(() => User, (user) => user.tasks)
-  @JoinTable()
-  users: User[];
+  @ManyToMany(() => User, (user) => user.tasks, { cascade: true }) 
+users: User[];
+
 }

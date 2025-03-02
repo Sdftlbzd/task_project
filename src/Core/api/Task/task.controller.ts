@@ -33,6 +33,7 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
         id: In(employee_ids),
       },
     });
+    console.log(employee_list)
 
     if (employee_list.length === 0) {
       res.status(404).json("Employee(s) not found!");
@@ -52,7 +53,9 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
       return;
     }
 
-    if (isBefore(selectedHour, minHour)) {
+    const isToday = selectedDeadline.toDateString() === now.toDateString();
+
+    if (isToday && isBefore(selectedHour, minHour)) {
       res.status(400).json({
         message: "Hour must be at least 30 minutes after the current time!",
       });
@@ -89,7 +92,6 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
     await newTask.save();
 
     res.status(201).json("Task created successfully!");
-    next();
   } catch (error) {
     res.status(500).json({
       message: "Something went wrong",
@@ -216,7 +218,7 @@ const getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 };
 
-const myTaskList = async (req: AuthRequest, res: Response) => {
+const taskList = async (req: AuthRequest, res: Response) => {
   try {
     const user = req.user;
 
@@ -238,7 +240,9 @@ const myTaskList = async (req: AuthRequest, res: Response) => {
 
     const query = Task.createQueryBuilder("task")
       .leftJoinAndSelect("task.users", "user")
-      .where("user.id = :userId", { userId: user.id })
+      .where("user.id = :userId OR task.creatorId = :userId", {
+        userId: user.id,
+      })
       .skip(before_page)
       .take(limit);
 
@@ -287,5 +291,5 @@ export const TaskController = () => ({
   create,
   update,
   getById,
-  myTaskList
+  taskList,
 });
