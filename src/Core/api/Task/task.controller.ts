@@ -105,9 +105,28 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
 
     await newTask.save();
 
-    res
-      .status(201)
-      .json({ message: "Task created successfully!", Data: newTask });
+    const task = await Task.findOne({
+      where: { id: newTask.id },
+      relations: ["users"],
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        deadline: true,
+        hour: true,
+        priority: true,
+        status: true,
+        created_at: true,
+        users: {
+          id: true,
+          name: true,
+          surname: true,
+          email: true,
+        },
+      },
+    });
+
+    res.status(201).json({ message: "Task created successfully!", Data: task });
   } catch (error) {
     res.status(500).json({
       message: "Something went wrong",
