@@ -261,34 +261,36 @@ const taskList = async (req: AuthRequest, res: Response) => {
 
     if (status) query.andWhere("task.status = :status", { status });
     if (priority) query.andWhere("task.priority = :priority", { priority });
-
-    if (title){
-      query.andWhere("task.title LIKE :title", { title: `%${title}%` });}
+    if (title) {
+      query.andWhere("task.title LIKE :title", { title: `%${title}%` });
+    }
 
     const isValidDate = (date: string) => !isNaN(Date.parse(date));
     if (startDate && endDate) {
       if (isValidDate(startDate) && isValidDate(endDate)) {
-          query.andWhere("task.deadline BETWEEN :startDate AND :endDate", {
-              startDate: new Date(startDate),
-              endDate: new Date(endDate),
-          });
+        query.andWhere("task.deadline BETWEEN :startDate AND :endDate", {
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+        });
       } else {
-        res.status(400).json({ message: "Invalid date format!"});
-        return}
-  }
-
+        res.status(400).json({ message: "Invalid date format!" });
+        return;
+      }
+    }
 
     if (createdStartDate && createdEndDate) {
       if (isValidDate(createdStartDate) && isValidDate(createdEndDate)) {
-      query.andWhere(
-        "task.created_at BETWEEN :createdStartDate AND :createdEndDate",
-        {
-          createdStartDate: new Date(createdStartDate),
-          createdEndDate: new Date(createdEndDate),
-        }
-      );} else {
-        res.status(400).json({ message: "Invalid date format!"});
-        return}
+        query.andWhere(
+          "task.created_at BETWEEN :createdStartDate AND :createdEndDate",
+          {
+            createdStartDate: new Date(createdStartDate),
+            createdEndDate: new Date(createdEndDate),
+          }
+        );
+      } else {
+        res.status(400).json({ message: "Invalid date format!" });
+        return;
+      }
     }
 
     const [list, total] = await query.getManyAndCount();
