@@ -36,7 +36,7 @@ const addEmployee = async (
 
     const employee = await User.findOne({ where: { email: email } });
     if (employee) {
-      res.status(409).json("Bu emaile uygun user artiq movcuddur");
+      res.status(409).json("A user with this email address already exists.");
       return;
     }
 
@@ -120,7 +120,9 @@ const updateTask = async (
     }
 
     if (isBefore(task.deadline, new Date())) {
-      res.status(400).json({ message: "Bu taskın deadline vaxtı keçib!" });
+      res
+        .status(400)
+        .json({ message: "The deadline for this task has passed!" });
       return;
     }
 

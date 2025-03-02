@@ -14,7 +14,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 
     const user = await User.findOne({ where: { email: email } });
     if (user) {
-      res.status(409).json("Bu emaile uygun user artiq movcuddur");
+      res.status(409).json("A user with this email address already exists.");
       return;
     }
 
@@ -67,7 +67,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   });
 
   if (!user) {
-    res.status(401).json({ message: "Email ve ya shifre sehvdir!" });
+    res.status(401).json({ message: "Incorrect email or password!" });
     return;
   }
 
@@ -75,7 +75,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
   if (!isValidPassword) {
     res.status(401).json({
-      message: "Email ve ya shifre sehvdir!",
+      message: "Incorrect email or password!",
     });
     console.log("parol yalnisdir");
     return;
@@ -97,35 +97,29 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const aboutMe = async (req: AuthRequest, res: Response) => {
-    try {
-      const user = req.user;
-      if (!user) {
-        res.status(401).json({ message: "Unauthorized" });
-        return;
-      }
-  
-      const data = await User.findOne({
-        where: { id: user.id },
-        select: [
-          "name",
-          "surname",
-          "email",
-          "username",
-          "created_at",
-        ],
-      });
-  
-      res.status(200).json(data);
-    } catch (error) {
-      res.status(500).json({
-        message: "Something went wrong",
-        error: error instanceof Error ? error.message : error,
-      });
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
     }
-  };
+
+    const data = await User.findOne({
+      where: { id: user.id },
+      select: ["name", "surname", "email", "username", "created_at"],
+    });
+
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
 
 export const AuthController = () => ({
   register,
   login,
-  aboutMe
+  aboutMe,
 });
