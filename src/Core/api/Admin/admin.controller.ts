@@ -17,7 +17,13 @@ const addEmployee = async (
   next: NextFunction
 ) => {
   try {
-    const user = req.user;
+    if (!req.user) {
+      res.status(401).json({ message: "User not found!" });
+      return;
+    }
+
+    const user = await User.findOne({ where:{ id: req.user.id},
+    relations:["created_company"]})
 
     if (!user) {
       res.status(401).json({ message: "User not found!" });
@@ -57,6 +63,7 @@ const addEmployee = async (
       username,
       status,
       role: ERoleType.EMPLOYEE,
+      company:user.created_company
     });
 
     await newUser.save();

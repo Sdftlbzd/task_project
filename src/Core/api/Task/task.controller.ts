@@ -5,13 +5,19 @@ import { formatErrors } from "../../middlewares/error.moddleware";
 import { AuthRequest } from "../../../types";
 import { CreateTaskDTO, UpdateTaskDTO } from "./task.dto";
 import { Task } from "../../../DAL/models/Task.model";
-import { In } from "typeorm";
+import { In, Not } from "typeorm";
 import { addMinutes, isBefore, startOfDay } from "date-fns";
-import { ETaskStatusType } from "../../app/enum";
+import { ERoleType, ETaskStatusType } from "../../app/enum";
 
 const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const user = req.user;
+    if (!req.user) {
+      res.status(401).json({ message: "User not found!" });
+      return;
+    }
+
+    const user = await User.findOne({ where:{ id: req.user.id},
+    relations:["company"]})
 
     if (!user) {
       res.status(401).json({ message: "User not found!" });
@@ -31,9 +37,10 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const employee_list = await User.find({
       where: {
         id: In(employee_ids),
+        role: Not (ERoleType.ADMIN),
+        company: user.created_company
       },
     });
-    console.log(employee_list)
 
     if (employee_list.length === 0) {
       res.status(404).json("Employee(s) not found!");
