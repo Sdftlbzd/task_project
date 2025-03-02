@@ -273,8 +273,8 @@ const taskList = async (req: AuthRequest, res: Response) => {
       pagination: {
         total,
         page,
-        items_on_page: list.length,
-        per_page: Math.ceil(Number(total) / limit),
+        per_page: list.length,
+        total_pages: Math.ceil(Number(total) / limit),
       },
     });
   } catch (error) {
