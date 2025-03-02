@@ -36,6 +36,11 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
       employee_ids,
     } = req.body;
 
+    if (!employee_ids) {
+      res.status(400).json("Employee_ids is required!");
+      return;
+    }
+
     const employee_list = await User.find({
       where: {
         id: In(employee_ids),
