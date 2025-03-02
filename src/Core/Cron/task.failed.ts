@@ -27,7 +27,7 @@ const markExpiredTasksAsFailed = async () => {
 
     if (expiredTasks.length > 0) {
       console.log(
-        `⚠️ ${expiredTasks.length} task deadline-i keçib, statusu FAILED olaraq dəyişdirilir...`
+        `${expiredTasks.length} task deadline-i keçib, statusu FAILED olaraq dəyişdirilir...`
       );
 
       for (const task of expiredTasks) {
@@ -35,18 +35,18 @@ const markExpiredTasksAsFailed = async () => {
         await task.save();
       }
 
-      console.log("✅ Deadline-i keçmiş taskların statusu FAILED oldu!");
+      console.log("Deadline-i keçmiş taskların statusu FAILED oldu!");
     } else {
-      console.log("⏳ Deadline-i keçmiş və hələ FAILED olmayan task yoxdur.");
+      console.log("Deadline-i keçmiş və hələ FAILED olmayan task yoxdur.");
     }
   } catch (error) {
-    console.error("❌ Cron job xətası:", error);
+    console.error("Cron job xətası:", error);
   }
 };
 
 // Cron job - hər dəqiqə tapşırıqların deadline-larını yoxlayır
 cron.schedule("* * * * *", async () => {
-  console.log("🔄 Cron job başladı: Deadline-i keçmiş taskları yoxlayır...");
+  console.log("Cron job başladı: Deadline-i keçmiş taskları yoxlayır...");
   await markExpiredTasksAsFailed();
 });
 
