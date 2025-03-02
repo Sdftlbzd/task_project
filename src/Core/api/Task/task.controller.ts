@@ -16,8 +16,10 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
       return;
     }
 
-    const user = await User.findOne({ where:{ id: req.user.id},
-    relations:["company"]})
+    const user = await User.findOne({
+      where: { id: req.user.id },
+      relations: ["company"],
+    });
 
     if (!user) {
       res.status(401).json({ message: "User not found!" });
@@ -37,8 +39,8 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const employee_list = await User.find({
       where: {
         id: In(employee_ids),
-        role: Not (ERoleType.ADMIN),
-        company: user.created_company
+        role: Not(ERoleType.ADMIN),
+        company: user.created_company,
       },
     });
 
@@ -98,7 +100,9 @@ const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
 
     await newTask.save();
 
-    res.status(201).json("Task created successfully!");
+    res
+      .status(201)
+      .json({ message: "Task created successfully!", Data: newTask });
   } catch (error) {
     res.status(500).json({
       message: "Something went wrong",
@@ -236,13 +240,15 @@ const taskList = async (req: AuthRequest, res: Response) => {
 
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
-    const status = req.query.status as string | undefined;
-    const priority = req.query.priority as string | undefined;
-    const title = req.query.title as string | undefined;
-    const startDate = req.query.startDate as string | undefined;
-    const endDate = req.query.endDate as string | undefined;
-    const createdStartDate = req.query.createdStartDate as string | undefined;
-    const createdEndDate = req.query.createdEndDate as string | undefined;
+    const status = (req.query.status as string)?.trim() || undefined;
+    const priority = (req.query.priority as string)?.trim() || undefined;
+    const title = (req.query.title as string)?.trim() || undefined;
+    const startDate = (req.query.startDate as string)?.trim() || undefined;
+    const endDate = (req.query.endDate as string)?.trim() || undefined;
+    const createdStartDate =
+      (req.query.createdStartDate as string)?.trim() || undefined;
+    const createdEndDate =
+      (req.query.createdEndDate as string)?.trim() || undefined;
     const before_page = (page - 1) * limit;
 
     const query = Task.createQueryBuilder("task")
@@ -255,24 +261,34 @@ const taskList = async (req: AuthRequest, res: Response) => {
 
     if (status) query.andWhere("task.status = :status", { status });
     if (priority) query.andWhere("task.priority = :priority", { priority });
-    if (title)
-      query.andWhere("task.title LIKE :title", { title: `%${title}%` });
 
+    if (title){
+      query.andWhere("task.title LIKE :title", { title: `%${title}%` });}
+
+    const isValidDate = (date: string) => !isNaN(Date.parse(date));
     if (startDate && endDate) {
-      query.andWhere("task.deadline BETWEEN :startDate AND :endDate", {
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-      });
-    }
+      if (isValidDate(startDate) && isValidDate(endDate)) {
+          query.andWhere("task.deadline BETWEEN :startDate AND :endDate", {
+              startDate: new Date(startDate),
+              endDate: new Date(endDate),
+          });
+      } else {
+        res.status(400).json({ message: "Invalid date format!"});
+        return}
+  }
+
 
     if (createdStartDate && createdEndDate) {
+      if (isValidDate(createdStartDate) && isValidDate(createdEndDate)) {
       query.andWhere(
         "task.created_at BETWEEN :createdStartDate AND :createdEndDate",
         {
           createdStartDate: new Date(createdStartDate),
           createdEndDate: new Date(createdEndDate),
         }
-      );
+      );} else {
+        res.status(400).json({ message: "Invalid date format!"});
+        return}
     }
 
     const [list, total] = await query.getManyAndCount();
