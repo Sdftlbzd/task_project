@@ -187,62 +187,15 @@ const updateTask = async (
   }
 };
 
-// const taskList = async (req: AuthRequest, res: Response) => {
-//   try {
-//     const page = Number(req.query.page) || 1;
-//     const limit = Number(req.query.limit) || 5;
-//     const status = req.query.status as string | undefined;
-//     const priority = req.query.priority as string | undefined;
-//     const title = req.query.title as string | undefined;
-//     const user_ids = req.query.user_ids as string | undefined;
-//     const startDate = req.query.startDate as string | undefined;
-//     const endDate = req.query.endDate as string | undefined;
-//     const before_page = (page - 1) * limit;
-
-//     const whereCondition: any = {};
-//     if (status) whereCondition.status = status;
-//     if (priority) whereCondition.priority = priority;
-//     if (title) whereCondition.title = `%${title}%`;
-
-//     if (startDate && endDate) {
-//       whereCondition.deadline = Between(new Date(startDate), new Date(endDate));
-//     }
-//     const query = Task.createQueryBuilder("task")
-//       .leftJoinAndSelect("task.users", "user")
-//       .skip(before_page)
-//       .take(limit);
-
-//     if (user_ids) {
-//       const userIds = user_ids.split(",").map((id) => Number(id));
-//       query.andWhere("user.id IN (:...userIds)", { userIds });
-//     }
-
-//     const [list, total] = await Task.findAndCount({
-//       where: whereCondition,
-//       relations: ["users"],
-//       skip: before_page,
-//       take: limit,
-//     });
-
-//     res.status(200).json({
-//       data: list,
-//       pagination: {
-//         total,
-//         page,
-//         items_on_page: list.length,
-//         per_page: Math.ceil(Number(total) / limit),
-//       },
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       message: "Something went wrong",
-//       error: error instanceof Error ? error.message : error,
-//     });
-//   }
-// };
-
 const taskList = async (req: AuthRequest, res: Response) => {
   try {
+    const user = req.user;
+
+    if (!user) {
+      res.status(401).json({ message: "User not found!" });
+      return;
+    }
+
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
     const status = req.query.status as string | undefined;
@@ -255,8 +208,11 @@ const taskList = async (req: AuthRequest, res: Response) => {
     const createdEndDate = req.query.createdEndDate as string | undefined;
     const before_page = (page - 1) * limit;
 
-    const query = Task.createQueryBuilder("task")
+      const query = Task.createQueryBuilder("task")
       .leftJoinAndSelect("task.users", "user")
+      .where("user.id = :userId OR task.creatorId = :userId", {
+        userId: user.id,
+      })
       .skip(before_page)
       .take(limit);
 
